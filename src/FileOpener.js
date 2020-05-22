@@ -34,7 +34,7 @@ class FileOpener extends React.Component {
         reader.readAsText(file);
     }
 
-    /** Read metadata and convert to a float array */
+    /** Read metadata and convert string to a float array */
     ParseTheData(dataString) {
 
         // Try to read necessary metadata from the string
@@ -103,13 +103,15 @@ class FileOpener extends React.Component {
     // File input form
     render() {
         return (
-            <form onSubmit={this.handleTheFile}>
-                <label>Valitse .asc -tiedosto:</label>
-                <br />
-                <input type='file' ref={this.inputFile} />
-                <br />
-                <button type='submit'>Submit</button>
-            </form>
+            <div>
+                <form onSubmit={this.handleTheFile}>
+                    <label>Valitse .asc -tiedosto:</label>
+                    <br />
+                    <input type='file' ref={this.inputFile} />
+                    <br />
+                    <button type='submit'>Submit</button>
+                </form>
+            </div>
         );
     }
 }

@@ -1,11 +1,13 @@
 import React from 'react';
 import FileOpener from './FileOpener';
+import Color from './Color';
 
 class HeightVisualizer extends React.Component {
     constructor(props) {
         super(props);
 
         this.handleMapLoad = this.handleMapLoad.bind(this);
+        this.handleColor = this.handleColor.bind(this);
 
         this.state = {
             // Map data
@@ -14,8 +16,9 @@ class HeightVisualizer extends React.Component {
             noDataValue: null,
             elevationData: null,
 
-            // Options
-            isMapLoaded: false
+            // 
+            isMapLoaded: false,
+            newMap: false
         }
     }
 
@@ -25,13 +28,24 @@ class HeightVisualizer extends React.Component {
             height: mapObject.height,
             noDataValue: mapObject.noDataValue,
             elevationData: mapObject.elevationData,
-            isMapLoaded: true
+            isMapLoaded: true,
+            newMap: true
+        });
+    }
+
+    handleColor() {
+        console.log('asdf');
+        this.setState({
+            newMap: false
         });
     }
 
     render() {
         return (
-            < FileOpener onMapLoad={this.handleMapLoad} />
+            <div>
+                < Color parentState={this.state} colorUpdate={this.handleColor} />
+                < FileOpener onMapLoad={this.handleMapLoad} />
+            </div>
         );
     }
 }
