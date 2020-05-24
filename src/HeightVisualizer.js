@@ -34,7 +34,6 @@ class HeightVisualizer extends React.Component {
     }
 
     handleColor() {
-        console.log('asdf');
         this.setState({
             newMap: false
         });
@@ -43,8 +42,9 @@ class HeightVisualizer extends React.Component {
     render() {
         return (
             <div>
-                < Color parentState={this.state} colorUpdate={this.handleColor} />
                 < FileOpener onMapLoad={this.handleMapLoad} />
+                <br />
+                < Color parentState={this.state} colorUpdate={this.handleColor} />
             </div>
         );
     }
