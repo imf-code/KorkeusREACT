@@ -1,86 +1,32 @@
-// Turning elevation values into RGB values
-
 import React from 'react';
+import MapCanvas from './MapCanvas';
 
+/** Visualize an array of height values */
 class Color extends React.Component {
     constructor(props) {
         super(props);
 
-        this.hiddenCanvasRef = React.createRef();
-        this.visibleCanvasRef = React.createRef();
-
-        this.AddDragEvent = this.AddDragEvent.bind(this);
-        this.RemoveDragEvent = this.RemoveDragEvent.bind(this);
-        this.DragEvent = this.DragEvent.bind(this);
-
         this.state = {
             elevationColorData: [],
-            isMapCalculated: false
+            coloredMapImageData: null,
         }
     }
 
-    componentDidMount() {
-
-        // Enable click and drag
-        let canvas = this.visibleCanvasRef.current;
-
-        canvas.addEventListener('mousedown', this.AddDragEvent);
-        canvas.addEventListener('mouseout', this.RemoveDragEvent);
-        canvas.addEventListener('mouseup', this.RemoveDragEvent);
-    }
-
-    componentWillUnmount() {
-        let canvas = this.visibleCanvasRef.current;
-        canvas.removeEventListener('mousedown', this.AddDragEvent);
-    }
-
-    AddDragEvent() { this.visibleCanvasRef.current.addEventListener('mousemove', this.DragEvent); }
-
-    RemoveDragEvent() { this.visibleCanvasRef.current.removeEventListener('mousemove', this.DragEvent); }
-
-    DragEvent(event) {
-
-        let canvas = this.visibleCanvasRef.current;
-        let ctx = canvas.getContext('2d');
-        let map = this.props.parentState;
-
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, map.width, map.height);
-
-        ctx.translate(event.movementX, event.movementY);
-
-        if (ctx.getTransform().e < -(map.width - canvas.width) ||
-            ctx.getTransform().e > 0) {
-
-            ctx.translate(-event.movementX, 0);
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps.parentState.elevationData !== this.props.parentState.elevationData) {
+            this.setState({
+                elevationColorData: this.CalculateRGBValues()
+            });
         }
-        if (ctx.getTransform().f < -(map.height - canvas.height) ||
-            ctx.getTransform().f > 0) {
-
-            ctx.translate(0, -event.movementY);
-        }
-
-        this.UpdateMap();
-    };
-
-    componentDidUpdate() {
-        const parentState = this.props.parentState;
-        if (parentState.newMap) {
-            this.setState({ isMapCalculated: false });
-        }
-        if (parentState.isMapLoaded && !this.state.isMapCalculated) {
-            this.CalculateRGBValues();
-            this.props.colorUpdate();
-        }
-        if (this.state.isMapCalculated) {
-            this.DrawMap();
+        if (prevState.elevationColorData !== this.state.elevationColorData) {
+            this.setState({
+                coloredMapImageData: this.DrawMap()
+            });
         }
     }
 
-    /** Calculate RGB values */
+    /** Calculate color intensity based on height values */
     CalculateRGBValues() {
-
-        // Calculate RGB values based on the max range of elevations
         console.log('Calculating RGB values...')
         const map = this.props.parentState;
         let minValue = this.getMin(map.elevationData);
@@ -88,23 +34,17 @@ class Color extends React.Component {
         let mapRange = maxValue - minValue;
 
         let calculatedValues = map.elevationData.map(item => Math.round(((item - minValue) / mapRange) * 255));
-        this.setState({ isMapCalculated: true, elevationColorData: [...calculatedValues] });
+
         console.log('Done.');
+        return calculatedValues;
     }
 
-    /** Colorize and draw map on offscreen canvas */
+    /** Create canvas ImageData and 'draw' the colorized map on it */
     DrawMap() {
         const map = this.props.parentState;
 
-        // Create canvas imagedata
-        console.log("Drawing the map...");
-        let mapCanvas = this.hiddenCanvasRef.current;
-        let mapContext = mapCanvas.getContext("2d");
-
-        mapCanvas.width = map.width;
-        mapCanvas.height = map.height;
-
-        let mapImageData = mapContext.createImageData(map.width, map.height);
+        console.log('Drawing the map...');
+        let mapImageData = new ImageData(map.width, map.height);
         let colorValues = [0, 255, 0];
 
 
@@ -116,24 +56,11 @@ class Color extends React.Component {
             mapImageData.data[n + 3] = this.state.elevationColorData[i];
         }
 
-        // Draw imagedata to canvas
-        mapContext.putImageData(mapImageData, 0, 0);
-        this.UpdateMap();
-
-        console.log("Done")
+        console.log('Done')
+        return mapImageData;
     }
 
-    /** Draw hidden canvas on visible canvas */
-    UpdateMap() {
-        let visible = this.visibleCanvasRef.current;
-        let vctx = visible.getContext('2d');
-
-        vctx.fillStyle = 'black';
-        vctx.fillRect(0, 0, this.props.parentState.width, this.props.parentState.height)
-        vctx.drawImage(this.hiddenCanvasRef.current, 0, 0);
-    }
-
-    /** Set colors based on user settings, in coloring.js */
+    /** Set colors based on user settings */
     /*
     ParseColorSettings() {
     
@@ -164,16 +91,12 @@ class Color extends React.Component {
 
     render() {
         const map = this.props.parentState;
-        const hiddenCanvas = {
-            display: 'none'
-        }
 
         return (
             <div>
-                <canvas width={map.width} height={map.height} ref={this.hiddenCanvasRef} style={hiddenCanvas}></canvas>
-                <canvas width={window.innerWidth} height={window.innerHeight - 200} ref={this.visibleCanvasRef}></canvas>
-                <br />
+                <MapCanvas width={map.width} height={map.height} image={this.state.coloredMapImageData} />
             </div>
+
         );
     }
 }

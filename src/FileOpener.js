@@ -1,7 +1,6 @@
-// Reading and initial parsing of elevation data from .asc file
-
 import React from 'react';
 
+/** Read and parse elevation data from .asc file */
 class FileOpener extends React.Component {
     constructor(props) {
         super(props);
@@ -13,6 +12,7 @@ class FileOpener extends React.Component {
     /** Open user file and read it as text */
     handleTheFile(event) {
         event.preventDefault();
+        if (this.inputFile.current.files[0] === undefined) { return; }
 
         // Confirm file extension and read the data as text
         console.log('Reading the file...');
@@ -100,7 +100,6 @@ class FileOpener extends React.Component {
         this.props.onMapLoad(map);
     }
 
-    // File input form
     render() {
         return (
             <div>

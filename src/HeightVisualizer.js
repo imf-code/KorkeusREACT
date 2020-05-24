@@ -7,35 +7,22 @@ class HeightVisualizer extends React.Component {
         super(props);
 
         this.handleMapLoad = this.handleMapLoad.bind(this);
-        this.handleColor = this.handleColor.bind(this);
 
         this.state = {
-            // Map data
-            width: null,
-            height: null,
+            width: 0,
+            height: 0,
             noDataValue: null,
-            elevationData: null,
-
-            // 
-            isMapLoaded: false,
-            newMap: false
+            elevationData: null
         }
     }
 
+    /** Set map data after file opening */
     handleMapLoad(mapObject) {
         this.setState({
             width: mapObject.width,
             height: mapObject.height,
             noDataValue: mapObject.noDataValue,
             elevationData: mapObject.elevationData,
-            isMapLoaded: true,
-            newMap: true
-        });
-    }
-
-    handleColor() {
-        this.setState({
-            newMap: false
         });
     }
 
